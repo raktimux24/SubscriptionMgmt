@@ -23,7 +23,7 @@ export function AddSubscription() {
 
         <div className="space-y-8">
           <SubscriptionForm />
-          <ImportOptions />
+          {/* <ImportOptions /> */}
         </div>
       </div>
     </SubscriptionLayout>
