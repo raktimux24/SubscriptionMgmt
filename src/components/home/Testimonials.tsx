@@ -3,23 +3,23 @@ import { Star } from 'lucide-react';
 
 const testimonials = [
   {
-    name: "Sarah Johnson",
+    name: "Kavitha Patel",
     role: "Small Business Owner",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&h=150",
-    content: "SubscriptionMaster has transformed how I manage my business subscriptions. The insights have helped me save over $200 monthly!",
+    image: "https://images.unsplash.com/photo-1706943262117-b35de4ba50b4?q=80&w=2304&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    content: "SubscriptEase has transformed how I manage my business subscriptions. The insights have helped me save over $200 monthly!",
     rating: 5
   },
   {
-    name: "Michael Chen",
+    name: "Peter Williams",
     role: "Tech Professional",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150",
+    image: "https://plus.unsplash.com/premium_photo-1671656349322-41de944d259b?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     content: "The dashboard is intuitive and the analytics are incredibly detailed. It's exactly what I needed to keep track of my subscriptions.",
     rating: 5
   },
   {
-    name: "Emma Davis",
+    name: "Mamta Singh",
     role: "Content Creator",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=150&h=150",
+    image: "https://plus.unsplash.com/premium_photo-1682089810582-f7b200217b67?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     content: "Finally, a tool that helps me manage all my creative software subscriptions in one place. The reminder system is a lifesaver!",
     rating: 5
   }

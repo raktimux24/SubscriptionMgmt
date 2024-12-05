@@ -9,7 +9,7 @@ export function Footer() {
           <div className="col-span-1">
             <div className="flex items-center mb-4">
               <CreditCard className="h-8 w-8 text-[#00A6B2]" />
-              <span className="ml-2 text-xl font-bold text-[#EAEAEA]">SubscriptionMaster</span>
+              <span className="ml-2 text-xl font-bold text-[#EAEAEA]">SubscriptEase</span>
             </div>
             <p className="text-sm">
               Your all-in-one solution for subscription management and optimization.
@@ -46,7 +46,7 @@ export function Footer() {
 
         <div className="border-t border-[#2A2A2A] mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm mb-4 md:mb-0">
-            © 2024 SubscriptionMaster. All rights reserved.
+          © 2024 SubscriptEase. All rights reserved.
           </p>
           <div className="flex space-x-6">
             <a href="#" className="hover:text-[#00A6B2] transition-colors">

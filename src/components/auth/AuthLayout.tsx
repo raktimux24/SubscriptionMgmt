@@ -1,5 +1,5 @@
 import React from 'react';
-import { CreditCard } from 'lucide-react';
+import { Club, CreditCard } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export function AuthLayout({ children }: { children: React.ReactNode }) {
@@ -8,8 +8,8 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
       <div className="flex-1 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <Link to="/" className="flex items-center justify-center">
-            <CreditCard className="h-12 w-12 text-[#00A6B2]" />
-            <span className="ml-2 text-2xl font-bold text-[#EAEAEA]">SubscriptionMaster</span>
+            <Club className="h-12 w-12 text-[#00A6B2]" />
+            <span className="ml-2 text-2xl font-bold text-[#EAEAEA]">SubscriptEase</span>
           </Link>
         </div>
 

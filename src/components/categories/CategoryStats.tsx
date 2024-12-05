@@ -5,15 +5,17 @@ import { useCategories } from '../../hooks/useCategories';
 export function CategoryStats() {
   const { categories, loading } = useCategories();
 
-  const totalBudget = categories.reduce((total, category) => total + category.budget, 0);
+  // Add null check and default to empty array
+  const validCategories = categories || [];
+  const totalBudget = validCategories.reduce((total, category) => total + (category.budget || 0), 0);
 
-  const data = categories
+  const data = validCategories
     .filter(category => category.budget > 0)
     .map(category => ({
       name: category.name,
-      value: category.budget,
+      value: category.budget || 0,
       color: category.color || '#8884d8',
-      percentage: ((category.budget / totalBudget) * 100).toFixed(1)
+      percentage: totalBudget > 0 ? ((category.budget / totalBudget) * 100).toFixed(1) : '0'
     }));
 
   const CustomTooltip = ({ active, payload }: any) => {
@@ -51,7 +53,7 @@ export function CategoryStats() {
   return (
     <div className="bg-[#1A1A1A] rounded-lg border border-[#2A2A2A] p-6">
       <h2 className="text-lg font-semibold text-[#EAEAEA] mb-2">Budget Distribution</h2>
-      <p className="text-sm text-[#999999] mb-6">Total Budget: ${totalBudget.toFixed(2)}</p>
+      <p className="text-sm text-[#999999] mb-6">Total Budget: ${typeof totalBudget === 'number' ? totalBudget.toFixed(2) : '0.00'}</p>
       
       <div style={{ width: '100%', height: 300 }}>
         <ResponsiveContainer>

@@ -16,47 +16,38 @@ export function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#121212] flex flex-col">
+    <div className="min-h-screen bg-[#121212] flex flex-col relative">
       {/* Gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#00A6B2]/5 via-transparent to-[#6A4C93]/5 pointer-events-none" />
       
       <div className="relative flex-1 flex flex-col">
         <DashboardHeader />
         
-        <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
-          {/* Header Section */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-6">
-            <h1 className="text-xl sm:text-2xl font-bold text-[#EAEAEA]">Dashboard Overview</h1>
+        <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 py-8">
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-2xl font-bold text-[#EAEAEA]">Dashboard Overview</h1>
             <button 
               onClick={handleAddSubscription}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-[#00A6B2] text-white rounded-lg hover:bg-[#008A94] transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-[#00A6B2] text-white rounded-lg hover:bg-[#008A94] transition-colors"
             >
               <Plus className="h-5 w-5" />
-              <span>Add Subscription</span>
+              Add Subscription
             </button>
           </div>
 
-          {/* Main Content */}
-          <div className="space-y-6">
-            {/* Summary Widgets */}
+          <div className="space-y-8">
             <SummaryWidgets />
             
-            {/* Charts and Quick Actions */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Quick Actions - Shown first on mobile */}
-              <div className="order-1 lg:order-2">
-                <QuickActions />
-              </div>
-              {/* Spending Chart */}
-              <div className="lg:col-span-2 order-2 lg:order-1">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2">
                 <SpendingChart />
+              </div>
+              <div>
+                <QuickActions />
               </div>
             </div>
 
-            {/* Subscription List */}
-            <div className="rounded-lg overflow-hidden">
-              <SubscriptionList />
-            </div>
+            <SubscriptionList />
           </div>
         </main>
 

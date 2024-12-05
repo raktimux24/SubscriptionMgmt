@@ -34,10 +34,21 @@ export async function getScheduleReview(userId: string): Promise<ReviewSchedule 
 export async function updateScheduleReview(userId: string, updates: Partial<ReviewSchedule>) {
   try {
     const scheduleRef = doc(db, 'scheduleReviews', userId);
-    await updateDoc(scheduleRef, {
-      ...updates,
-      updatedAt: new Date().toISOString()
-    });
+    const scheduleDoc = await getDoc(scheduleRef);
+    
+    if (!scheduleDoc.exists()) {
+      // Create the document if it doesn't exist
+      await setDoc(scheduleRef, {
+        ...updates,
+        updatedAt: new Date().toISOString()
+      });
+    } else {
+      // Update existing document
+      await updateDoc(scheduleRef, {
+        ...updates,
+        updatedAt: new Date().toISOString()
+      });
+    }
     return true;
   } catch (error) {
     console.error('Error updating schedule review:', error);

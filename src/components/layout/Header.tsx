@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Menu, X, CreditCard } from 'lucide-react';
+import { Menu, X, CreditCard, Heart, Club } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 
@@ -39,8 +39,8 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex justify-between items-center py-4">
           <Link to="/" className="flex items-center">
-            <CreditCard className="h-8 w-8 text-[#00A6B2]" />
-            <span className="ml-2 text-xl font-bold text-[#EAEAEA] whitespace-nowrap">SubscriptionMaster</span>
+            <Club className="h-8 w-8 text-[#00A6B2]" />
+            <span className="ml-2 text-xl font-bold text-[#EAEAEA] whitespace-nowrap">SubscriptEase</span>
           </Link>
           
           <nav className="hidden lg:flex space-x-8">
@@ -53,7 +53,7 @@ export function Header() {
             ) : (
               <>
                 <a href="#features" className="text-[#C0C0C0] hover:text-[#00A6B2] transition-colors">Features</a>
-                <a href="#pricing" className="text-[#C0C0C0] hover:text-[#00A6B2] transition-colors">Pricing</a>
+                
                 <a href="#testimonials" className="text-[#C0C0C0] hover:text-[#00A6B2] transition-colors">Testimonials</a>
               </>
             )}
@@ -99,102 +99,75 @@ export function Header() {
       {/* Mobile menu */}
       <div 
         id="mobile-menu"
-        className={`fixed inset-0 z-50 lg:hidden transition-all duration-300 ease-in-out ${
-          isMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
+        className={`absolute top-full left-0 right-0 z-50 lg:hidden bg-[#0A0A0A] border-t border-[#2A2A2A] ${
+          isMenuOpen ? 'block' : 'hidden'
         }`}
-        style={{ marginTop: '73px' }}
       >
-        <div 
-          className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-          onClick={() => setIsMenuOpen(false)}
-        />
-        <div 
-          className={`absolute right-0 top-0 h-full w-64 bg-[#121212] border-l border-[#2A2A2A] transform transition-transform duration-300 ease-in-out ${
-            isMenuOpen ? 'translate-x-0' : 'translate-x-full'
-          }`}
-        >
-          <div className="px-4 py-6 space-y-6">
-            <nav className="space-y-4">
-              {user ? (
-                <>
-                  <Link 
-                    to="/dashboard" 
-                    className="block text-[#C0C0C0] hover:text-[#00A6B2] transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Dashboard
-                  </Link>
-                  <Link 
-                    to="/subscriptions" 
-                    className="block text-[#C0C0C0] hover:text-[#00A6B2] transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Subscriptions
-                  </Link>
-                  <Link 
-                    to="/budget" 
-                    className="block text-[#C0C0C0] hover:text-[#00A6B2] transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Budget
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <a 
-                    href="#features" 
-                    className="block text-[#C0C0C0] hover:text-[#00A6B2] transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Features
-                  </a>
-                  <a 
-                    href="#pricing" 
-                    className="block text-[#C0C0C0] hover:text-[#00A6B2] transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Pricing
-                  </a>
-                  <a 
-                    href="#testimonials" 
-                    className="block text-[#C0C0C0] hover:text-[#00A6B2] transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Testimonials
-                  </a>
-                </>
-              )}
-            </nav>
-            <div className="space-y-4">
-              {user ? (
-                <Link 
-                  to="/profile" 
-                  className="block w-full bg-[#00A6B2] text-white px-4 py-2 rounded-lg hover:bg-[#008A94] transition-colors text-center"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Profile
-                </Link>
-              ) : (
-                <>
-                  <Link 
-                    to="/login" 
-                    className="block w-full text-[#EAEAEA] hover:text-[#00A6B2] transition-colors text-center"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Log in
-                  </Link>
-                  <Link 
-                    to="/signup" 
-                    className="block w-full bg-[#00A6B2] text-white px-4 py-2 rounded-lg hover:bg-[#008A94] transition-colors text-center"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Sign up
-                  </Link>
-                </>
-              )}
+        <nav className="py-4 px-6">
+          {user ? (
+            <div className="space-y-3">
+              <Link 
+                to="/dashboard" 
+                className="block px-4 py-2 text-[#C0C0C0] hover:text-[#00A6B2] hover:bg-[#1A1A1A] transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Dashboard
+              </Link>
+              <Link 
+                to="/subscriptions" 
+                className="block px-4 py-2 text-[#C0C0C0] hover:text-[#00A6B2] hover:bg-[#1A1A1A] transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Subscriptions
+              </Link>
+              <Link 
+                to="/budget" 
+                className="block px-4 py-2 text-[#C0C0C0] hover:text-[#00A6B2] hover:bg-[#1A1A1A] transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Budget
+              </Link>
+              <Link 
+                to="/profile" 
+                className="block px-4 py-2 text-[#EAEAEA] bg-[#00A6B2] hover:bg-[#008A94] transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Profile
+              </Link>
             </div>
-          </div>
-        </div>
+          ) : (
+            <div className="space-y-3">
+              <a 
+                href="#features" 
+                className="block px-4 py-2 text-[#C0C0C0] hover:text-[#00A6B2] hover:bg-[#1A1A1A] transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Features
+              </a>
+              <a 
+                href="#testimonials" 
+                className="block px-4 py-2 text-[#C0C0C0] hover:text-[#00A6B2] hover:bg-[#1A1A1A] transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Testimonials
+              </a>
+              <Link 
+                to="/login" 
+                className="block px-4 py-2 text-[#EAEAEA] hover:text-[#00A6B2] hover:bg-[#1A1A1A] transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Log in
+              </Link>
+              <Link 
+                to="/signup" 
+                className="block px-4 py-2 text-[#EAEAEA] bg-[#00A6B2] hover:bg-[#008A94] transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Sign up
+              </Link>
+            </div>
+          )}
+        </nav>
       </div>
     </header>
   );

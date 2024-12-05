@@ -12,7 +12,7 @@ export function DashboardFooter() {
           {/* Copyright and Made with love */}
           <div className="flex flex-col space-y-4 lg:space-y-0 lg:flex-row lg:items-center lg:space-x-6">
             <div className="flex items-center justify-center lg:justify-start space-x-1 text-sm text-[#C0C0C0]">
-              <span> {currentYear} SubscriptionMaster.</span>
+              <span> {currentYear} SubscriptEase.</span>
               <span className="hidden sm:inline">Made with</span>
               <Heart className="h-4 w-4 text-red-400" />
               <span className="hidden sm:inline">in Bengaluru, India.</span>

@@ -57,11 +57,14 @@ export function SubscriptionTable({
               <td className="px-6 py-4">
                 <button 
                   onClick={() => navigate(`/subscription/${subscription.id}`)}
-                  className="flex items-center hover:text-[#00A6B2] transition-colors"
+                  className="group flex flex-col items-start hover:text-[#00A6B2] transition-colors"
                 >
-                  <div>
-                    <div className="text-[#EAEAEA] font-medium text-left">{subscription.name}</div>
-                    <div className="text-sm text-[#C0C0C0]">{subscription.billingCycle}</div>
+                  <div className="text-[#EAEAEA] font-medium group-hover:text-[#00A6B2] transition-colors">{subscription.name}</div>
+                  <div className="text-sm text-[#C0C0C0] capitalize group-hover:text-[#00A6B2] transition-colors">
+                    {subscription.billingCycle === 'yearly' ? 'Annual' : 
+                     subscription.billingCycle === 'monthly' ? 'Monthly' : 
+                     subscription.billingCycle === 'quarterly' ? 'Quarterly' : 
+                     subscription.billingCycle} billing
                   </div>
                 </button>
               </td>

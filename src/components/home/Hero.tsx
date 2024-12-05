@@ -1,10 +1,11 @@
 import React from 'react';
 import { ArrowRight, Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export function Hero() {
   return (
-    <div className="relative overflow-hidden bg-[#121212] pt-32 pb-24">
-      <div className="absolute inset-0 bg-gradient-to-br from-[#00A6B2]/10 via-transparent to-[#6A4C93]/10" />
+    <div className="relative bg-[#121212] pt-32 pb-24">
+      <div className="absolute top-0 left-0 right-0 bottom-0 bg-gradient-to-br from-[#00A6B2]/10 via-transparent to-[#6A4C93]/10" />
       
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
         <div className="text-center">
@@ -20,10 +21,13 @@ export function Hero() {
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center gap-4 mb-12">
-            <button className="bg-[#00A6B2] text-white px-8 py-3 rounded-lg hover:bg-[#008A94] transition-colors flex items-center justify-center">
+            <Link 
+              to="/signup"
+              className="bg-[#00A6B2] text-white px-8 py-3 rounded-lg hover:bg-[#008A94] transition-colors flex items-center justify-center"
+            >
               Get Started Free
               <ArrowRight className="ml-2 h-5 w-5" />
-            </button>
+            </Link>
             <button className="border border-[#2A2A2A] text-[#EAEAEA] px-8 py-3 rounded-lg hover:bg-[#2A2A2A] transition-colors">
               Watch Demo
             </button>

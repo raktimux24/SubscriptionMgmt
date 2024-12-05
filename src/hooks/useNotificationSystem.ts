@@ -2,10 +2,12 @@ import { useEffect } from 'react';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import { useBudget } from '../contexts/BudgetContext';
 import { useNotification } from '../contexts/NotificationContext';
+import { useReviewSchedule } from '../contexts/ReviewScheduleContext';
 
 export function useNotificationSystem() {
   const { state: subscriptionState } = useSubscription();
   const { state: budgetState } = useBudget();
+  const { state: reviewScheduleState } = useReviewSchedule();
   const { dispatch } = useNotification();
 
   // Check for upcoming payments
@@ -123,4 +125,56 @@ export function useNotificationSystem() {
       }
     });
   }, [subscriptionState.subscriptions]);
+
+  // Monitor schedule reviews
+  useEffect(() => {
+    if (!reviewScheduleState.schedule.enabled || !reviewScheduleState.schedule.nextReview) return;
+
+    const nextReview = new Date(reviewScheduleState.schedule.nextReview);
+    const today = new Date();
+    const daysUntilReview = Math.ceil((nextReview.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+    // Notification for 5 days before review
+    if (daysUntilReview === 5) {
+      const notificationId = `review-upcoming-${nextReview.toISOString()}`;
+      dispatch({
+        type: 'ADD_NOTIFICATION',
+        payload: {
+          id: notificationId,
+          title: 'Upcoming Schedule Review',
+          message: `Your subscription review is scheduled in 5 days on ${nextReview.toLocaleDateString('en-US', {
+            weekday: 'long',
+            month: 'long',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric'
+          })}`,
+          type: 'review',
+          timestamp: Date.now(),
+          isRead: false
+        }
+      });
+    }
+
+    // Notification for review day
+    if (daysUntilReview === 0) {
+      const hoursDiff = Math.abs(nextReview.getHours() - today.getHours());
+      const minutesDiff = Math.abs(nextReview.getMinutes() - today.getMinutes());
+      
+      if (hoursDiff === 0 && minutesDiff <= 5) {
+        const notificationId = `review-now-${nextReview.toISOString()}`;
+        dispatch({
+          type: 'ADD_NOTIFICATION',
+          payload: {
+            id: notificationId,
+            title: 'Schedule Review Due',
+            message: 'Your subscription review is due now. Take a moment to review your active subscriptions.',
+            type: 'review',
+            timestamp: Date.now(),
+            isRead: false
+          }
+        });
+      }
+    }
+  }, [reviewScheduleState.schedule, dispatch]);
 }

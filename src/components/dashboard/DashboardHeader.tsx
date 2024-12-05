@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Menu } from '@headlessui/react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Bell, Settings, LogOut, CreditCard, Menu as MenuIcon, X } from 'lucide-react';
+import { Bell, Settings, LogOut, CreditCard, Menu as MenuIcon, X, Club } from 'lucide-react';
 import { useNotification } from '../../contexts/NotificationContext';
 import { NotificationsPanel } from '../notifications/NotificationsPanel';
 import { useHeaderProfile } from '../../hooks/useHeaderProfile';
@@ -64,8 +64,8 @@ export function DashboardHeader() {
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-8">
             <Link to="/dashboard" className="flex items-center">
-              <CreditCard className="h-8 w-8 text-[#00A6B2]" />
-              <span className="ml-2 text-xl font-bold text-[#EAEAEA] whitespace-nowrap">SubscriptionMaster</span>
+              <Club className="h-8 w-8 text-[#00A6B2]" />
+              <span className="ml-2 text-xl font-bold text-[#EAEAEA] whitespace-nowrap">SubscriptEase</span>
             </Link>
             <nav className="hidden lg:flex space-x-6">
               <Link to="/dashboard" className={getLinkClassName('/dashboard')}>
