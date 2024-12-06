@@ -23,26 +23,26 @@ export function Dashboard() {
       <div className="relative flex-1 flex flex-col">
         <DashboardHeader />
         
-        <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 py-8">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-2xl font-bold text-[#EAEAEA]">Dashboard Overview</h1>
+        <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-6 sm:mb-8">
+            <h1 className="text-xl sm:text-2xl font-bold text-[#EAEAEA]">Dashboard Overview</h1>
             <button 
               onClick={handleAddSubscription}
-              className="flex items-center gap-2 px-4 py-2 bg-[#00A6B2] text-white rounded-lg hover:bg-[#008A94] transition-colors"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-[#00A6B2] text-white rounded-lg hover:bg-[#008A94] transition-colors"
             >
-              <Plus className="h-5 w-5" />
+              <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
               Add Subscription
             </button>
           </div>
 
-          <div className="space-y-8">
+          <div className="space-y-4 sm:space-y-6 md:space-y-8">
             <SummaryWidgets />
             
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+              <div className="lg:col-span-2 w-full overflow-x-auto">
                 <SpendingChart />
               </div>
-              <div>
+              <div className="w-full">
                 <QuickActions />
               </div>
             </div>

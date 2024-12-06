@@ -44,29 +44,23 @@ export function SummaryWidgets() {
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
       {widgets.map((widget, index) => (
         <div 
           key={index} 
-          className="bg-[#1A1A1A] rounded-lg p-4 sm:p-6 border border-[#2A2A2A] hover:border-[#3A3A3A] transition-colors"
+          className="bg-[#1A1A1A] rounded-lg p-4 sm:p-5 md:p-6 border border-[#2A2A2A] hover:border-[#3A3A3A] transition-colors"
         >
           <div className="flex items-start justify-between">
-            <div className="flex-1 min-w-0">
-              <p className="text-[#C0C0C0] text-sm truncate">{widget.title}</p>
-              <p className="mt-2 text-xl sm:text-2xl font-semibold text-[#EAEAEA] truncate">{widget.value}</p>
+            <div className="space-y-2 sm:space-y-3">
+              <p className="text-sm text-[#888888]">{widget.title}</p>
+              <p className="text-lg sm:text-xl md:text-2xl font-semibold text-[#EAEAEA]">
+                {widget.value}
+              </p>
+              <p className="text-xs sm:text-sm text-[#666666]">{widget.change}</p>
             </div>
-            <div className="flex-shrink-0 bg-[#2A2A2A] p-2 sm:p-3 rounded-lg ml-4">
-              <widget.icon className="h-5 w-5 sm:h-6 sm:w-6 text-[#00A6B2]" />
+            <div className={`p-2 sm:p-3 rounded-lg bg-[#2A2A2A] text-[#EAEAEA]`}>
+              <widget.icon className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
-          </div>
-          <div className="mt-4">
-            <span className={`text-sm ${
-              widget.trend === 'up' ? 'text-red-400' :
-              widget.trend === 'down' ? 'text-green-400' :
-              'text-[#C0C0C0]'
-            }`}>
-              {widget.trend === 'up' ? '↑ ' : widget.trend === 'down' ? '↓ ' : ''}{widget.change}
-            </span>
           </div>
         </div>
       ))}

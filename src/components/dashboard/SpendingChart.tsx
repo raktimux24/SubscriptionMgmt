@@ -27,17 +27,21 @@ export function SpendingChart() {
   };
 
   return (
-    <div className="bg-[#1A1A1A] rounded-lg p-6 border border-[#2A2A2A]">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg font-semibold text-[#EAEAEA]">Monthly Spending Trend</h2>
+    <div className="bg-[#1A1A1A] rounded-lg p-4 sm:p-5 md:p-6 border border-[#2A2A2A]">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 sm:mb-6">
+        <h2 className="text-base sm:text-lg font-semibold text-[#EAEAEA]">Monthly Spending Trend</h2>
+        <div className="flex items-center gap-2 text-sm">
+          <span className="text-[#888888]">Projected Annual:</span>
+          <span className="text-[#EAEAEA] font-medium">${projectedAnnual.toFixed(2)}</span>
+        </div>
       </div>
 
-      <div className="h-[300px]">
+      <div className="h-[250px] sm:h-[300px] w-full min-w-[300px]">
         {data && data.length > 0 ? (
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
               data={data}
-              margin={{ top: 10, right: 30, left: 10, bottom: 0 }}
+              margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
             >
               <defs>
                 <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
@@ -49,40 +53,35 @@ export function SpendingChart() {
                 strokeDasharray="3 3" 
                 vertical={false}
                 stroke="#2A2A2A"
-                opacity={0.5}
               />
               <XAxis 
                 dataKey="month" 
-                stroke="#C0C0C0"
-                tick={{ fill: '#C0C0C0', fontSize: 12 }}
+                stroke="#666666" 
+                fontSize={12}
+                tickMargin={10}
                 axisLine={{ stroke: '#2A2A2A' }}
-                tickLine={{ stroke: '#2A2A2A' }}
+                tick={{ fill: '#888888' }}
               />
-              <YAxis 
-                stroke="#C0C0C0"
-                tick={{ fill: '#C0C0C0', fontSize: 12 }}
-                tickFormatter={(value) => `$${value}`}
+              <YAxis
+                stroke="#666666"
+                fontSize={12}
+                tickMargin={10}
                 axisLine={{ stroke: '#2A2A2A' }}
-                tickLine={{ stroke: '#2A2A2A' }}
-                width={80}
+                tick={{ fill: '#888888' }}
+                tickFormatter={(value) => `$${value}`}
               />
               <Tooltip content={<CustomTooltip />} />
               <Area
                 type="monotone"
                 dataKey="amount"
                 stroke="#00A6B2"
-                strokeWidth={2}
                 fillOpacity={1}
                 fill="url(#colorAmount)"
-                isAnimationActive={true}
-                animationDuration={1000}
-                dot={{ stroke: '#00A6B2', strokeWidth: 2, r: 4, fill: '#1A1A1A' }}
-                activeDot={{ stroke: '#00A6B2', strokeWidth: 2, r: 6, fill: '#1A1A1A' }}
               />
             </AreaChart>
           </ResponsiveContainer>
         ) : (
-          <div className="h-full flex items-center justify-center text-[#C0C0C0]">
+          <div className="h-full flex items-center justify-center text-[#666666]">
             No spending data available
           </div>
         )}
