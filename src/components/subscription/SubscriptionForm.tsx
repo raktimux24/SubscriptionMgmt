@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Calendar } from 'lucide-react';
 import { CategorySelect } from './CategorySelect';
 import { useSubscriptions } from '../../hooks/useSubscriptions';
 import { useNavigate } from 'react-router-dom';
 import type { Subscription } from '../../lib/firebase/subscriptions';
+import { useSubscriptionLimits } from '../../hooks/useSubscriptionLimits';
+import { UpgradeModal } from './UpgradeModal';
 
 interface SubscriptionFormData {
   name: string;
@@ -36,6 +38,8 @@ export function SubscriptionForm({ subscription, mode = 'add' }: SubscriptionFor
 
   const { addSubscription, updateSubscription } = useSubscriptions();
   const navigate = useNavigate();
+  const { isAtLimit } = useSubscriptionLimits();
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   const onSubmit = async (data: SubscriptionFormData) => {
     if (mode === 'edit' && subscription) {
@@ -47,6 +51,11 @@ export function SubscriptionForm({ subscription, mode = 'add' }: SubscriptionFor
         navigate('/dashboard');
       }
     } else {
+      if (isAtLimit) {
+        setShowUpgradeModal(true);
+        return;
+      }
+      
       const { error } = await addSubscription({
         ...data,
         status: 'active',
@@ -210,6 +219,7 @@ export function SubscriptionForm({ subscription, mode = 'add' }: SubscriptionFor
           </button>
         </div>
       </form>
+      {showUpgradeModal && <UpgradeModal onClose={() => setShowUpgradeModal(false)} />}
     </div>
   );
 }

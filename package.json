@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@headlessui/react": "^1.7.19",
+    "@react-three/fiber": "^8.17.10",
+    "@types/three": "^0.171.0",
     "dotenv": "^16.4.7",
     "firebase": "^10.8.1",
     "framer-motion": "^11.15.0",
@@ -21,6 +23,7 @@
     "react-hot-toast": "^2.4.1",
     "react-router-dom": "^6.28.1",
     "recharts": "^2.15.0",
+    "three": "^0.171.0",
     "zustand": "^4.5.2"
   },
   "devDependencies": {

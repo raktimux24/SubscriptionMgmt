@@ -11,16 +11,14 @@ export function useSubscriptionLimits() {
   }, [subscriptions]);
 
   const isFreeUser = profile?.subscriptionType === 'free';
-  const activeCount = activeSubscriptions.length;
+  const activeCount = profile?.activeSubscriptionCount || 0;
   const isAtLimit = isFreeUser && activeCount >= 5;
-  const canAddMore = !isAtLimit;
 
   return {
     activeSubscriptions,
     activeCount,
     isFreeUser,
     isAtLimit,
-    canAddMore,
     maxSubscriptions: isFreeUser ? 5 : Infinity
   };
 }

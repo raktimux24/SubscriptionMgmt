@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthGuard } from './components/auth/AuthGuard';
+import { SubscriptionLimitGuard } from './components/auth/SubscriptionLimitGuard';
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
 import { Login } from './pages/Login';
@@ -49,12 +50,19 @@ function ProtectedRoutes() {
                   <Routes>
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/subscriptions" element={<SubscriptionList />} />
-                    <Route path="/budget" element={<Budget />} />
-                    <Route path="/categories" element={<Categories />} />
-                    <Route path="/settings" element={<Settings />} />
-                    <Route path="/add-subscription" element={<AddSubscription />} />
+                    <Route 
+                      path="/add-subscription" 
+                      element={
+                        <SubscriptionLimitGuard>
+                          <AddSubscription />
+                        </SubscriptionLimitGuard>
+                      } 
+                    />
                     <Route path="/edit-subscription/:id" element={<EditSubscription />} />
                     <Route path="/subscription/:id" element={<SubscriptionDetail />} />
+                    <Route path="/settings" element={<Settings />} />
+                    <Route path="/budget" element={<Budget />} />
+                    <Route path="/categories" element={<Categories />} />
                   </Routes>
                 </NotificationWrapper>
               </SettingsProvider>

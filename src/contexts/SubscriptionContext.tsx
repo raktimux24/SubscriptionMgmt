@@ -3,7 +3,8 @@ import {
   calculateTotalMonthlySpend,
   calculateUpcomingPayments,
 } from '../utils/subscriptionCalculations';
-import { subscribeToSubscriptions } from '../lib/firebase/subscriptions';
+import { subscribeToUserSubscriptions } from '../lib/firebase/subscriptions';
+import { useAuthStore } from '../stores/authStore';
 
 export interface Subscription {
   id: string;
@@ -50,18 +51,10 @@ function subscriptionReducer(state: SubscriptionState, action: SubscriptionActio
         subscriptions: action.payload,
         totalMonthlySpend: calculateTotalMonthlySpend(action.payload),
         upcomingPayments: calculateUpcomingPayments(action.payload),
-        activeSubscriptions: action.payload.filter(sub => sub.status === 'active').length,
+        activeSubscriptions: action.payload.filter(s => s.status === 'active').length,
         isLoading: false
       };
     }
-
-    case 'SET_LOADING': {
-      return {
-        ...state,
-        isLoading: action.payload
-      };
-    }
-
     case 'ADD_SUBSCRIPTION': {
       const newSubscriptions = [...state.subscriptions, action.payload];
       return {
@@ -69,51 +62,53 @@ function subscriptionReducer(state: SubscriptionState, action: SubscriptionActio
         subscriptions: newSubscriptions,
         totalMonthlySpend: calculateTotalMonthlySpend(newSubscriptions),
         upcomingPayments: calculateUpcomingPayments(newSubscriptions),
-        activeSubscriptions: newSubscriptions.filter(sub => sub.status === 'active').length
+        activeSubscriptions: newSubscriptions.filter(s => s.status === 'active').length
       };
     }
-    
     case 'UPDATE_SUBSCRIPTION': {
-      const updatedSubscriptions = state.subscriptions.map(sub =>
-        sub.id === action.payload.id ? action.payload : sub
+      const newSubscriptions = state.subscriptions.map(subscription =>
+        subscription.id === action.payload.id ? action.payload : subscription
       );
       return {
         ...state,
-        subscriptions: updatedSubscriptions,
-        totalMonthlySpend: calculateTotalMonthlySpend(updatedSubscriptions),
-        upcomingPayments: calculateUpcomingPayments(updatedSubscriptions),
-        activeSubscriptions: updatedSubscriptions.filter(sub => sub.status === 'active').length
+        subscriptions: newSubscriptions,
+        totalMonthlySpend: calculateTotalMonthlySpend(newSubscriptions),
+        upcomingPayments: calculateUpcomingPayments(newSubscriptions),
+        activeSubscriptions: newSubscriptions.filter(s => s.status === 'active').length
       };
     }
-
     case 'DELETE_SUBSCRIPTION': {
-      const remainingSubscriptions = state.subscriptions.filter(
-        sub => sub.id !== action.payload
+      const newSubscriptions = state.subscriptions.filter(
+        subscription => subscription.id !== action.payload
       );
       return {
         ...state,
-        subscriptions: remainingSubscriptions,
-        totalMonthlySpend: calculateTotalMonthlySpend(remainingSubscriptions),
-        upcomingPayments: calculateUpcomingPayments(remainingSubscriptions),
-        activeSubscriptions: remainingSubscriptions.filter(sub => sub.status === 'active').length
+        subscriptions: newSubscriptions,
+        totalMonthlySpend: calculateTotalMonthlySpend(newSubscriptions),
+        upcomingPayments: calculateUpcomingPayments(newSubscriptions),
+        activeSubscriptions: newSubscriptions.filter(s => s.status === 'active').length
       };
     }
-
     case 'SET_STATUS': {
-      const updatedSubscriptions = state.subscriptions.map(sub =>
-        sub.id === action.payload.id
-          ? { ...sub, status: action.payload.status }
-          : sub
+      const newSubscriptions = state.subscriptions.map(subscription =>
+        subscription.id === action.payload.id
+          ? { ...subscription, status: action.payload.status }
+          : subscription
       );
       return {
         ...state,
-        subscriptions: updatedSubscriptions,
-        totalMonthlySpend: calculateTotalMonthlySpend(updatedSubscriptions),
-        upcomingPayments: calculateUpcomingPayments(updatedSubscriptions),
-        activeSubscriptions: updatedSubscriptions.filter(sub => sub.status === 'active').length
+        subscriptions: newSubscriptions,
+        totalMonthlySpend: calculateTotalMonthlySpend(newSubscriptions),
+        upcomingPayments: calculateUpcomingPayments(newSubscriptions),
+        activeSubscriptions: newSubscriptions.filter(s => s.status === 'active').length
       };
     }
-
+    case 'SET_LOADING': {
+      return {
+        ...state,
+        isLoading: action.payload
+      };
+    }
     default:
       return state;
   }
@@ -126,14 +121,26 @@ const SubscriptionContext = createContext<{
 
 export function SubscriptionProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(subscriptionReducer, initialState);
+  const { user } = useAuthStore();
 
   useEffect(() => {
-    const unsubscribe = subscribeToSubscriptions((subscriptions) => {
-      dispatch({ type: 'SET_SUBSCRIPTIONS', payload: subscriptions });
+    if (!user?.uid) {
+      dispatch({ type: 'SET_SUBSCRIPTIONS', payload: [] });
+      return;
+    }
+
+    const unsubscribe = subscribeToUserSubscriptions(user.uid, {
+      next: (subscriptions) => {
+        dispatch({ type: 'SET_SUBSCRIPTIONS', payload: subscriptions });
+      },
+      error: (error) => {
+        console.error('Error in subscription context:', error);
+        dispatch({ type: 'SET_SUBSCRIPTIONS', payload: [] });
+      }
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [user?.uid]);
 
   return (
     <SubscriptionContext.Provider value={{ state, dispatch }}>
@@ -144,7 +151,7 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
 
 export function useSubscription() {
   const context = useContext(SubscriptionContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useSubscription must be used within a SubscriptionProvider');
   }
   return context;

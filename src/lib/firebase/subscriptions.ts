@@ -9,11 +9,12 @@ import {
   where, 
   serverTimestamp,
   getDoc,
-  Unsubscribe
+  Unsubscribe,
+  and
 } from 'firebase/firestore';
-import { db, auth } from './config';
+import { db } from './config';
 import { calculateNextPaymentDate } from '../../utils/subscriptionCalculations';
-import { UserProfile } from './users';
+import { UserProfile, incrementSubscriptionCount, decrementSubscriptionCount } from './users';
 import { canAddSubscription } from '../../utils/subscriptionLimits';
 
 export interface Subscription {
@@ -32,55 +33,52 @@ export interface Subscription {
   updatedAt: Date;
 }
 
-export function subscribeToSubscriptions(callback: (subscriptions: Subscription[]) => void): Unsubscribe {
-  if (!auth.currentUser) throw new Error('No authenticated user');
-  
+export function subscribeToUserSubscriptions(
+  userId: string,
+  observer: { next: (subscriptions: Subscription[]) => void; error: (error: Error) => void }
+): Unsubscribe {
   const subscriptionsRef = collection(db, 'subscriptions');
-  const q = query(subscriptionsRef, where('userId', '==', auth.currentUser.uid));
+  const q = query(subscriptionsRef, where('userId', '==', userId));
   
   return onSnapshot(q, {
     next: (snapshot) => {
-      console.log('Raw subscription docs:', snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-      
       const subscriptions = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
         createdAt: doc.data().createdAt?.toDate(),
         updatedAt: doc.data().updatedAt?.toDate()
       })) as Subscription[];
-      
-      console.log('Processed subscriptions:', subscriptions);
-      callback(subscriptions);
+      observer.next(subscriptions);
     },
     error: (error) => {
       console.error('Error in subscriptions subscription:', error);
-      callback([]);
+      observer.error(error);
     }
   });
 }
 
 export async function addSubscription(
-  subscriptionData: Omit<Subscription, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
-): Promise<{ subscription: Subscription | null; error: string | null }> {
+  userId: string,
+  data: Omit<Subscription, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
+): Promise<{ subscription?: Subscription; error: string | null }> {
   try {
-    if (!auth.currentUser) throw new Error('No authenticated user');
-
-    const userRef = doc(db, 'users', auth.currentUser.uid);
+    const userRef = doc(db, 'users', userId);
     const userSnap = await getDoc(userRef);
-    if (!userSnap.exists()) throw new Error('User profile not found');
+    if (!userSnap.exists()) {
+      return { error: 'User profile not found' };
+    }
 
     const userProfile = { id: userSnap.id, ...userSnap.data() } as UserProfile;
-    const { allowed, error } = await canAddSubscription(auth.currentUser.uid, userProfile);
+    const { allowed, error } = await canAddSubscription(userId, userProfile);
     
     if (!allowed) {
-      throw new Error(error);
+      return { error };
     }
 
     const subscriptionsRef = collection(db, 'subscriptions');
     const newSubscription = {
-      ...subscriptionData,
-      userId: auth.currentUser.uid,
-      status: 'active',
+      ...data,
+      userId,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     };
@@ -88,7 +86,17 @@ export async function addSubscription(
     const docRef = await addDoc(subscriptionsRef, newSubscription);
     const newDoc = await getDoc(docRef);
 
-    if (!newDoc.exists()) throw new Error('Failed to create subscription');
+    if (!newDoc.exists()) {
+      return { error: 'Failed to create subscription' };
+    }
+
+    // If the subscription is active, increment the user's active subscription count
+    if (data.status === 'active') {
+      const { error: countError } = await incrementSubscriptionCount(userId);
+      if (countError) {
+        return { error: countError };
+      }
+    }
 
     return {
       subscription: {
@@ -100,67 +108,100 @@ export async function addSubscription(
       error: null
     };
   } catch (error) {
-    return { subscription: null, error: error.message };
+    return { error: error.message };
   }
 }
 
 export async function updateSubscription(
   subscriptionId: string,
   updates: Partial<Subscription>
-) {
-  if (!auth.currentUser) throw new Error('No authenticated user');
-
+): Promise<{ subscription?: Subscription; error: string | null }> {
   try {
-    const updateData: any = {
-      ...updates,
-      updatedAt: serverTimestamp()
-    };
+    const subscriptionRef = doc(db, 'subscriptions', subscriptionId);
+    const subscriptionSnap = await getDoc(subscriptionRef);
 
-    // If billing cycle is updated, recalculate next payment date
-    if (updates.billingCycle || updates.startDate) {
-      const docRef = doc(db, 'subscriptions', subscriptionId);
-      const docSnap = await getDoc(docRef);
-      
-      if (!docSnap.exists()) {
-        throw new Error('Subscription not found');
-      }
-      
-      const currentData = docSnap.data();
-      const startDate = updates.startDate || currentData.startDate;
-      const billingCycle = updates.billingCycle || currentData.billingCycle;
-      
-      const nextDate = calculateNextPaymentDate(startDate, billingCycle);
-      updateData.nextPayment = nextDate.toISOString();
+    if (!subscriptionSnap.exists()) {
+      return { error: 'Subscription not found' };
     }
 
-    const docRef = doc(db, 'subscriptions', subscriptionId);
-    await updateDoc(docRef, updateData);
+    const currentSubscription = { id: subscriptionSnap.id, ...subscriptionSnap.data() } as Subscription;
+    const userId = currentSubscription.userId;
 
+    // If status is being updated, handle subscription count
+    if (updates.status && updates.status !== currentSubscription.status) {
+      if (updates.status === 'active') {
+        const userRef = doc(db, 'users', userId);
+        const userSnap = await getDoc(userRef);
+        if (!userSnap.exists()) {
+          return { error: 'User profile not found' };
+        }
+
+        const userProfile = { id: userSnap.id, ...userSnap.data() } as UserProfile;
+        const { allowed, error } = await canAddSubscription(userId, userProfile);
+        
+        if (!allowed) {
+          return { error };
+        }
+
+        const { error: countError } = await incrementSubscriptionCount(userId);
+        if (countError) {
+          return { error: countError };
+        }
+      } else if (currentSubscription.status === 'active') {
+        const { error: countError } = await decrementSubscriptionCount(userId);
+        if (countError) {
+          return { error: countError };
+        }
+      }
+    }
+
+    await updateDoc(subscriptionRef, {
+      ...updates,
+      updatedAt: serverTimestamp()
+    });
+
+    const updatedDoc = await getDoc(subscriptionRef);
     return {
       subscription: {
-        id: subscriptionId,
-        ...updates,
-        nextPayment: updateData.nextPayment,
-        updatedAt: new Date()
-      },
+        id: updatedDoc.id,
+        ...updatedDoc.data(),
+        createdAt: updatedDoc.data()?.createdAt?.toDate(),
+        updatedAt: updatedDoc.data()?.updatedAt?.toDate()
+      } as Subscription,
       error: null
     };
   } catch (error) {
-    console.error('Error updating subscription:', error);
-    return { subscription: null, error: error.message };
+    return { error: error.message };
   }
 }
 
-export async function deleteSubscription(subscriptionId: string) {
+export async function deleteSubscription(
+  subscriptionId: string
+): Promise<{ error: string | null }> {
   try {
-    if (!auth.currentUser) throw new Error('No authenticated user');
-    
     const subscriptionRef = doc(db, 'subscriptions', subscriptionId);
-    await deleteDoc(subscriptionRef);
+    const subscriptionSnap = await getDoc(subscriptionRef);
+
+    if (!subscriptionSnap.exists()) {
+      return { error: 'Subscription not found' };
+    }
+
+    const subscription = { id: subscriptionSnap.id, ...subscriptionSnap.data() } as Subscription;
     
-    return { success: true, error: null };
+    // If the subscription was active, decrement the count
+    if (subscription.status === 'active') {
+      const { error: countError } = await decrementSubscriptionCount(subscription.userId);
+      if (countError) {
+        return { error: countError };
+      }
+    }
+
+    await deleteDoc(subscriptionRef);
+    return { error: null };
   } catch (error) {
-    console.error('Error deleting subscription:', error);
-    return { success: false, error: error.message };
+    return { error: error.message };
   }
 }
+
+// Alias for backward compatibility
+export const createSubscription = addSubscription;

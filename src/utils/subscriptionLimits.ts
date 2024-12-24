@@ -9,18 +9,8 @@ export async function canAddSubscription(userId: string, userProfile: UserProfil
     return { allowed: true };
   }
 
-  // For free users, check the current active subscription count
-  const subscriptionsRef = collection(db, 'subscriptions');
-  const q = query(
-    subscriptionsRef, 
-    and(
-      where('userId', '==', userId),
-      where('status', '==', 'active')
-    )
-  );
-  
-  const querySnapshot = await getDocs(q);
-  const activeCount = querySnapshot.size;
+  // For free users, check the current active subscription count from their profile
+  const activeCount = userProfile.activeSubscriptionCount || 0;
 
   if (activeCount >= FREE_USER_LIMIT) {
     return {

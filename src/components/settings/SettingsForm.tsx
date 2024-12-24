@@ -4,6 +4,7 @@ import { useProfile } from '../../hooks/useProfile';
 import { ProfilePicture } from './ProfilePicture';
 import { UserProfile } from '../../lib/firebase/users';
 import { CreditCard } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 type SettingsFormData = Omit<UserProfile, 'id' | 'createdAt' | 'updatedAt' | 'photoURL'>;
 
@@ -11,8 +12,9 @@ export function SettingsForm() {
   const { profile, loading, updateProfile } = useProfile();
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  
-  const { register, handleSubmit, formState: { errors, isDirty } } = useForm<SettingsFormData>({
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const { register, handleSubmit, formState: { errors, isDirty }, setValue, watch } = useForm<SettingsFormData>({
     defaultValues: {
       name: profile?.name || '',
       email: profile?.email || '',
@@ -27,6 +29,8 @@ export function SettingsForm() {
     }
   });
 
+  const currentSubscriptionType = watch('subscriptionType');
+
   const handleImageSelect = (file: File) => {
     setSelectedImage(file);
     const reader = new FileReader();
@@ -36,14 +40,30 @@ export function SettingsForm() {
     reader.readAsDataURL(file);
   };
 
-  const handleUpgrade = () => {
-    // TODO: Implement upgrade to pro plan logic
-    console.log('Upgrade to pro plan');
+  const handleUpgrade = async () => {
+    setIsUpdating(true);
+    try {
+      await updateProfile({ subscriptionType: 'paid' });
+      setValue('subscriptionType', 'paid');
+      toast.success('Successfully upgraded to Pro plan!');
+    } catch (error) {
+      toast.error('Failed to upgrade plan. Please try again.');
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
-  const handleDowngrade = () => {
-    // TODO: Implement downgrade to free plan logic
-    console.log('Downgrade to free plan');
+  const handleDowngrade = async () => {
+    setIsUpdating(true);
+    try {
+      await updateProfile({ subscriptionType: 'free' });
+      setValue('subscriptionType', 'free');
+      toast.success('Successfully downgraded to Free plan');
+    } catch (error) {
+      toast.error('Failed to downgrade plan. Please try again.');
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   const onSubmit = async (data: SettingsFormData) => {
@@ -151,30 +171,39 @@ export function SettingsForm() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between bg-[#121212] p-4 rounded-lg border border-[#2A2A2A]">
-          <div>
-            <h3 className="text-sm font-medium text-[#EAEAEA]">Subscription Plan</h3>
-            <p className="text-sm text-[#C0C0C0] mt-1">
-              {profile?.subscriptionType === 'free' ? (
-                'Free Plan (Limited to 5 subscriptions)'
-              ) : (
-                'Pro Plan (Unlimited subscriptions)'
-              )}
-            </p>
+        <div className="border-t border-[#2A2A2A] pt-6">
+          <h3 className="text-lg font-semibold text-[#EAEAEA] mb-4">Subscription Plan</h3>
+          <div className="bg-[#121212] rounded-lg p-4 border border-[#2A2A2A]">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 rounded-lg bg-[#2A2A2A]">
+                  <CreditCard className="h-5 w-5 text-[#00A6B2]" />
+                </div>
+                <div>
+                  <p className="text-[#EAEAEA] font-medium">
+                    {currentSubscriptionType === 'paid' ? 'Pro Plan' : 'Free Plan'}
+                  </p>
+                  <p className="text-sm text-[#C0C0C0]">
+                    {currentSubscriptionType === 'paid' 
+                      ? 'Unlimited subscriptions and premium features' 
+                      : 'Up to 5 active subscriptions'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={currentSubscriptionType === 'paid' ? handleDowngrade : handleUpgrade}
+                disabled={isUpdating || loading}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  currentSubscriptionType === 'paid'
+                    ? 'bg-[#2A2A2A] text-[#EAEAEA] hover:bg-[#3A3A3A]'
+                    : 'bg-[#00A6B2] text-white hover:bg-[#008A94]'
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                {isUpdating ? 'Updating...' : currentSubscriptionType === 'paid' ? 'Downgrade to Free' : 'Upgrade to Pro'}
+              </button>
+            </div>
           </div>
-          <button
-            type="button"
-            onClick={profile?.subscriptionType === 'free' ? handleUpgrade : handleDowngrade}
-            disabled
-            className="flex items-center px-4 py-2 bg-[#00A6B2] text-white rounded-lg hover:bg-[#008A94] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <CreditCard className="h-4 w-4 mr-2" />
-            {profile?.subscriptionType === 'free' ? 'Upgrade to Pro' : 'Downgrade to Free Plan'}
-          </button>
-          <input
-            type="hidden"
-            {...register('subscriptionType')}
-          />
         </div>
 
         <div>
@@ -192,7 +221,7 @@ export function SettingsForm() {
           <button
             type="submit"
             disabled={!isDirty || loading}
-            className="px-6 py-2 bg-[#00A6B2] text-white rounded-lg hover:bg-[#008A94] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-[#00A6B2] text-white rounded-lg font-medium hover:bg-[#008A94] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Saving...' : 'Save Changes'}
           </button>

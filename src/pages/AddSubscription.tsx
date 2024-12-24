@@ -1,22 +1,27 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { SubscriptionForm } from '../components/subscription/SubscriptionForm';
 import { ImportOptions } from '../components/subscription/ImportOptions';
 import { SubscriptionLayout } from '../components/subscription/SubscriptionLayout';
 import { useSubscriptionLimits } from '../hooks/useSubscriptionLimits';
-import toast from 'react-hot-toast';
+import { UpgradeModal } from '../components/subscription/UpgradeModal';
 
 export function AddSubscription() {
   const navigate = useNavigate();
   const { isAtLimit, maxSubscriptions } = useSubscriptionLimits();
 
   useEffect(() => {
+    // Immediately redirect to dashboard if at limit
     if (isAtLimit) {
-      toast.error(`Free users can only add up to ${maxSubscriptions} subscriptions. Please upgrade to Pro for unlimited subscriptions.`);
       navigate('/dashboard');
     }
-  }, [isAtLimit, maxSubscriptions, navigate]);
+  }, [isAtLimit, navigate]);
+
+  // Don't render anything if at limit (will redirect)
+  if (isAtLimit) {
+    return null;
+  }
 
   return (
     <SubscriptionLayout>

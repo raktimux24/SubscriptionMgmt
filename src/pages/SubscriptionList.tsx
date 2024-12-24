@@ -5,11 +5,20 @@ import { SubscriptionListHeader } from '../components/subscription/SubscriptionL
 import { SubscriptionTable } from '../components/subscription/SubscriptionTable';
 import { useSubscriptions } from '../hooks/useSubscriptions';
 import { Plus, Loader } from 'lucide-react';
+import { useSubscriptionUpgrade } from '../hooks/useSubscriptionUpgrade';
+import { UpgradeModal } from '../components/subscription/UpgradeModal';
 
 export function SubscriptionList() {
   const navigate = useNavigate();
   const { subscriptions, loading, updateSubscription, deleteSubscription } = useSubscriptions();
   const [searchTerm, setSearchTerm] = useState('');
+  const {
+    showUpgradeModal,
+    handleAddSubscriptionClick,
+    handleUpgradeModalClose,
+    handleUpgradeClick,
+    isAtLimit
+  } = useSubscriptionUpgrade();
 
   const handleStatusChange = async (id: string, status: 'active' | 'inactive') => {
     await updateSubscription(id, { status });
@@ -48,38 +57,34 @@ export function SubscriptionList() {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold text-[#EAEAEA]">All Subscriptions</h1>
           <button 
-            onClick={() => navigate('/add-subscription')}
-            className="flex items-center gap-2 px-4 py-2 bg-[#00A6B2] text-white rounded-lg hover:bg-[#008A94] transition-colors"
+            onClick={handleAddSubscriptionClick}
+            disabled={isAtLimit}
+            className="flex items-center gap-2 px-4 py-2 bg-[#00A6B2] text-white rounded-lg hover:bg-[#008A94] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Plus className="h-5 w-5" />
             Add Subscription
           </button>
         </div>
 
-        <div className="bg-[#1A1A1A] rounded-lg border border-[#2A2A2A] overflow-visible">
+        <div className="space-y-6">
           <SubscriptionListHeader
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
-            onFilterClick={() => {}}
-            onSortClick={() => {}}
           />
-          
+
           <SubscriptionTable
             subscriptions={filteredSubscriptions}
             onStatusChange={handleStatusChange}
             onEdit={handleEdit}
             onDelete={handleDelete}
           />
-          
-          {filteredSubscriptions.length === 0 && (
-            <div className="p-8 text-center">
-              <p className="text-[#C0C0C0]">
-                {searchTerm ? 'No subscriptions match your search.' : 'No subscriptions found.'}
-              </p>
-            </div>
-          )}
         </div>
       </div>
+
+      <UpgradeModal 
+        isOpen={showUpgradeModal}
+        onClose={handleUpgradeModalClose}
+      />
     </SubscriptionLayout>
   );
 }

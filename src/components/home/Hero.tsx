@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 export function Hero() {
   return (
-    <div className="relative bg-[#121212] h-[90vh] flex items-center overflow-hidden">
+    <div className="relative bg-[#121212] h-[95vh] flex items-center overflow-hidden">
       <div className="absolute top-0 left-0 right-0 bottom-0 bg-gradient-to-tl from-[#00A6B2]/15 via-transparent to-[#6A4C93]/15 pointer-events-none" />
       
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
