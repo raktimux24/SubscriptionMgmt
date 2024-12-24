@@ -13,6 +13,8 @@ import {
 } from 'firebase/firestore';
 import { db, auth } from './config';
 import { calculateNextPaymentDate } from '../../utils/subscriptionCalculations';
+import { UserProfile } from './users';
+import { canAddSubscription } from '../../utils/subscriptionLimits';
 
 export interface Subscription {
   id: string;
@@ -59,37 +61,45 @@ export function subscribeToSubscriptions(callback: (subscriptions: Subscription[
 
 export async function addSubscription(
   subscriptionData: Omit<Subscription, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
-) {
-  if (!auth.currentUser) throw new Error('No authenticated user');
-
-  const now = new Date();
-  const startDate = subscriptionData.startDate || now.toISOString();
-  const nextPayment = calculateNextPaymentDate(startDate, subscriptionData.billingCycle).toISOString();
-
+): Promise<{ subscription: Subscription | null; error: string | null }> {
   try {
-    const docRef = await addDoc(collection(db, 'subscriptions'), {
+    if (!auth.currentUser) throw new Error('No authenticated user');
+
+    const userRef = doc(db, 'users', auth.currentUser.uid);
+    const userSnap = await getDoc(userRef);
+    if (!userSnap.exists()) throw new Error('User profile not found');
+
+    const userProfile = { id: userSnap.id, ...userSnap.data() } as UserProfile;
+    const { allowed, error } = await canAddSubscription(auth.currentUser.uid, userProfile);
+    
+    if (!allowed) {
+      throw new Error(error);
+    }
+
+    const subscriptionsRef = collection(db, 'subscriptions');
+    const newSubscription = {
       ...subscriptionData,
       userId: auth.currentUser.uid,
-      startDate,
-      nextPayment,
+      status: 'active',
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
-    });
+    };
+
+    const docRef = await addDoc(subscriptionsRef, newSubscription);
+    const newDoc = await getDoc(docRef);
+
+    if (!newDoc.exists()) throw new Error('Failed to create subscription');
 
     return {
       subscription: {
-        id: docRef.id,
-        ...subscriptionData,
-        userId: auth.currentUser.uid,
-        startDate,
-        nextPayment,
-        createdAt: now,
-        updatedAt: now
-      },
+        id: newDoc.id,
+        ...newDoc.data(),
+        createdAt: newDoc.data().createdAt?.toDate(),
+        updatedAt: newDoc.data().updatedAt?.toDate()
+      } as Subscription,
       error: null
     };
   } catch (error) {
-    console.error('Error adding subscription:', error);
     return { subscription: null, error: error.message };
   }
 }

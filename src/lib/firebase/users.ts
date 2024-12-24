@@ -13,6 +13,7 @@ export interface UserProfile {
   zipCode?: string;
   country?: string;
   bio?: string;
+  subscriptionType: 'free' | 'paid';
   createdAt?: Date;
   updatedAt?: Date;
 }

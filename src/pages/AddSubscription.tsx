@@ -1,11 +1,23 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { SubscriptionForm } from '../components/subscription/SubscriptionForm';
 import { ImportOptions } from '../components/subscription/ImportOptions';
 import { SubscriptionLayout } from '../components/subscription/SubscriptionLayout';
+import { useSubscriptionLimits } from '../hooks/useSubscriptionLimits';
+import toast from 'react-hot-toast';
 
 export function AddSubscription() {
+  const navigate = useNavigate();
+  const { isAtLimit, maxSubscriptions } = useSubscriptionLimits();
+
+  useEffect(() => {
+    if (isAtLimit) {
+      toast.error(`Free users can only add up to ${maxSubscriptions} subscriptions. Please upgrade to Pro for unlimited subscriptions.`);
+      navigate('/dashboard');
+    }
+  }, [isAtLimit, maxSubscriptions, navigate]);
+
   return (
     <SubscriptionLayout>
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">

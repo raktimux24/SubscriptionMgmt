@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { Chrome } from 'lucide-react';
@@ -6,7 +6,7 @@ import { AuthLayout } from '../components/auth/AuthLayout';
 import { InputField } from '../components/auth/InputField';
 import { SocialButton } from '../components/auth/SocialButton';
 import { BackToHome } from '../components/auth/BackToHome';
-import { signUp, signInWithGoogle } from '../lib/firebase/auth';
+import { signUp, signInWithGoogle, onAuthStateChange } from '../lib/firebase/auth';
 import toast from 'react-hot-toast';
 
 interface SignupFormData {
@@ -19,27 +19,54 @@ export function Signup() {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<SignupFormData>();
   const navigate = useNavigate();
 
+  // Handle auth state changes
+  useEffect(() => {
+    console.log('Setting up auth state observer...');
+    const unsubscribe = onAuthStateChange((user) => {
+      console.log('Auth state changed:', user);
+      if (user) {
+        console.log('User is authenticated, navigating to dashboard');
+        toast.success('Account created successfully!');
+        navigate('/dashboard');
+      }
+    });
+
+    return () => unsubscribe();
+  }, [navigate]);
+
   const onSubmit = async (data: SignupFormData) => {
-    const { user, error } = await signUp(data.email, data.password, data.name);
-    if (error) {
-      toast.error(error);
-      return;
-    }
-    if (user) {
-      toast.success('Account created successfully!');
-      navigate('/dashboard');
+    try {
+      const { user, error } = await signUp(data.email, data.password, data.name);
+      if (error) {
+        toast.error(error);
+        return;
+      }
+      if (user) {
+        toast.success('Account created successfully!');
+        navigate('/dashboard');
+      }
+    } catch (error) {
+      console.error('Signup error:', error);
+      toast.error('An unexpected error occurred');
     }
   };
 
   const handleGoogleSignup = async () => {
-    const { user, error } = await signInWithGoogle();
-    if (error) {
-      toast.error(error);
-      return;
-    }
-    if (user) {
-      toast.success('Account created successfully!');
-      navigate('/dashboard');
+    try {
+      const { user, error } = await signInWithGoogle();
+      if (error) {
+        console.error('Google signup error:', error);
+        toast.error(error);
+        return;
+      }
+      if (user) {
+        console.log('Google signup successful:', user);
+        toast.success('Account created successfully!');
+        navigate('/dashboard');
+      }
+    } catch (error) {
+      console.error('Unexpected error during Google signup:', error);
+      toast.error('An unexpected error occurred');
     }
   };
 

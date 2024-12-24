@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Chrome } from 'lucide-react';
@@ -6,7 +6,7 @@ import { AuthLayout } from '../components/auth/AuthLayout';
 import { InputField } from '../components/auth/InputField';
 import { SocialButton } from '../components/auth/SocialButton';
 import { BackToHome } from '../components/auth/BackToHome';
-import { signIn, signInWithGoogle } from '../lib/firebase/auth';
+import { signIn, signInWithGoogle, onAuthStateChange } from '../lib/firebase/auth';
 import toast from 'react-hot-toast';
 
 interface LoginFormData {
@@ -20,27 +20,54 @@ export function Login() {
   const location = useLocation();
   const from = (location.state as any)?.from?.pathname || '/dashboard';
 
+  // Handle auth state changes
+  useEffect(() => {
+    console.log('Setting up auth state observer...');
+    const unsubscribe = onAuthStateChange((user) => {
+      console.log('Auth state changed:', user);
+      if (user) {
+        console.log('User is authenticated, navigating to:', from);
+        toast.success('Welcome back!');
+        navigate(from, { replace: true });
+      }
+    });
+
+    return () => unsubscribe();
+  }, [navigate, from]);
+
   const onSubmit = async (data: LoginFormData) => {
-    const { user, error } = await signIn(data.email, data.password);
-    if (error) {
-      toast.error(error);
-      return;
-    }
-    if (user) {
-      toast.success('Welcome back!');
-      navigate(from, { replace: true });
+    try {
+      const { user, error } = await signIn(data.email, data.password);
+      if (error) {
+        toast.error(error);
+        return;
+      }
+      if (user) {
+        toast.success('Welcome back!');
+        navigate(from, { replace: true });
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error('An unexpected error occurred');
     }
   };
 
   const handleGoogleLogin = async () => {
-    const { user, error } = await signInWithGoogle();
-    if (error) {
-      toast.error(error);
-      return;
-    }
-    if (user) {
-      toast.success('Welcome back!');
-      navigate(from, { replace: true });
+    try {
+      const { user, error } = await signInWithGoogle();
+      if (error) {
+        console.error('Google login error:', error);
+        toast.error(error);
+        return;
+      }
+      if (user) {
+        console.log('Google login successful:', user);
+        toast.success('Welcome back!');
+        navigate(from, { replace: true });
+      }
+    } catch (error) {
+      console.error('Unexpected error during Google login:', error);
+      toast.error('An unexpected error occurred');
     }
   };
 

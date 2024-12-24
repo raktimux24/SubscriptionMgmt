@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useProfile } from '../../hooks/useProfile';
 import { ProfilePicture } from './ProfilePicture';
 import { UserProfile } from '../../lib/firebase/users';
+import { CreditCard } from 'lucide-react';
 
 type SettingsFormData = Omit<UserProfile, 'id' | 'createdAt' | 'updatedAt' | 'photoURL'>;
 
@@ -21,7 +22,8 @@ export function SettingsForm() {
       state: profile?.state || '',
       zipCode: profile?.zipCode || '',
       country: profile?.country || '',
-      bio: profile?.bio || ''
+      bio: profile?.bio || '',
+      subscriptionType: profile?.subscriptionType || 'free'
     }
   });
 
@@ -32,6 +34,16 @@ export function SettingsForm() {
       setPreviewUrl(reader.result as string);
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleUpgrade = () => {
+    // TODO: Implement upgrade to pro plan logic
+    console.log('Upgrade to pro plan');
+  };
+
+  const handleDowngrade = () => {
+    // TODO: Implement downgrade to free plan logic
+    console.log('Downgrade to free plan');
   };
 
   const onSubmit = async (data: SettingsFormData) => {
@@ -107,7 +119,7 @@ export function SettingsForm() {
 
           <div>
             <label className="block text-sm font-medium text-[#EAEAEA] mb-2">
-              State/Province
+              State
             </label>
             <input
               type="text"
@@ -118,7 +130,7 @@ export function SettingsForm() {
 
           <div>
             <label className="block text-sm font-medium text-[#EAEAEA] mb-2">
-              ZIP/Postal Code
+              ZIP Code
             </label>
             <input
               type="text"
@@ -139,6 +151,32 @@ export function SettingsForm() {
           </div>
         </div>
 
+        <div className="flex items-center justify-between bg-[#121212] p-4 rounded-lg border border-[#2A2A2A]">
+          <div>
+            <h3 className="text-sm font-medium text-[#EAEAEA]">Subscription Plan</h3>
+            <p className="text-sm text-[#C0C0C0] mt-1">
+              {profile?.subscriptionType === 'free' ? (
+                'Free Plan (Limited to 5 subscriptions)'
+              ) : (
+                'Pro Plan (Unlimited subscriptions)'
+              )}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={profile?.subscriptionType === 'free' ? handleUpgrade : handleDowngrade}
+            disabled
+            className="flex items-center px-4 py-2 bg-[#00A6B2] text-white rounded-lg hover:bg-[#008A94] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <CreditCard className="h-4 w-4 mr-2" />
+            {profile?.subscriptionType === 'free' ? 'Upgrade to Pro' : 'Downgrade to Free Plan'}
+          </button>
+          <input
+            type="hidden"
+            {...register('subscriptionType')}
+          />
+        </div>
+
         <div>
           <label className="block text-sm font-medium text-[#EAEAEA] mb-2">
             Bio
@@ -147,15 +185,14 @@ export function SettingsForm() {
             {...register('bio')}
             rows={4}
             className="w-full px-4 py-2 bg-[#121212] border border-[#2A2A2A] rounded-lg text-[#EAEAEA] focus:outline-none focus:border-[#00A6B2]"
-            placeholder="Tell us a little about yourself..."
           />
         </div>
 
         <div className="flex justify-end">
           <button
             type="submit"
-            disabled={!isDirty && !selectedImage || loading}
-            className="px-6 py-2 bg-[#00A6B2] text-white rounded-lg hover:bg-[#008A94] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            disabled={!isDirty || loading}
+            className="px-6 py-2 bg-[#00A6B2] text-white rounded-lg hover:bg-[#008A94] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Saving...' : 'Save Changes'}
           </button>
