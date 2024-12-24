@@ -4,20 +4,20 @@ import { Link } from 'react-router-dom';
 
 export function Hero() {
   return (
-    <div className="relative bg-[#121212] pt-32 pb-24">
-      <div className="absolute top-0 left-0 right-0 bottom-0 bg-gradient-to-br from-[#00A6B2]/10 via-transparent to-[#6A4C93]/10" />
+    <div className="relative bg-[#121212] h-[90vh] flex items-center overflow-hidden">
+      <div className="absolute top-0 left-0 right-0 bottom-0 bg-gradient-to-tl from-[#00A6B2]/15 via-transparent to-[#6A4C93]/15 pointer-events-none" />
       
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
         <div className="text-center">
-          <h1 className="text-4xl sm:text-6xl font-bold text-[#EAEAEA] mb-6">
-            Master Your Subscriptions
+          <h1 className="text-4xl sm:text-6xl font-bold text-[#EAEAEA] mb-6 max-w-[850px] mx-auto">
+            Take Control of Your Subscriptions with Ease
             <span className="inline-block ml-2">
               <Sparkles className="h-8 w-8 text-[#C5A900]" />
             </span>
           </h1>
           
-          <p className="text-xl text-[#C0C0C0] max-w-2xl mx-auto mb-8">
-            Take control of your recurring payments. Track, manage, and optimize all your subscriptions in one powerful dashboard.
+          <p className="text-xl text-[#C0C0C0] max-w-[850px] mx-auto mb-8">
+            Manage, track, and optimize all your recurring payments effortlessly. Join SubscriptEase today and simplify your financial life.
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center gap-4 mb-12">
@@ -25,30 +25,21 @@ export function Hero() {
               to="/signup"
               className="bg-[#00A6B2] text-white px-8 py-3 rounded-lg hover:bg-[#008A94] transition-colors flex items-center justify-center"
             >
-              Get Started Free
+              Get Early Access
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
-            <button className="border border-[#2A2A2A] text-[#EAEAEA] px-8 py-3 rounded-lg hover:bg-[#2A2A2A] transition-colors">
-              Watch Demo
+            <button 
+              className="border border-[#2A2A2A] text-[#EAEAEA] px-8 py-3 rounded-lg hover:bg-[#2A2A2A] transition-colors"
+              onClick={() => {
+                const featuresSection = document.getElementById('features');
+                featuresSection?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
+              Learn More
             </button>
           </div>
 
-          <div className="bg-[#1A1A1A] rounded-xl p-6 max-w-3xl mx-auto">
-            <div className="grid grid-cols-3 gap-6 text-center">
-              <div>
-                <div className="text-2xl font-bold text-[#00A6B2]">$2.5M+</div>
-                <div className="text-[#C0C0C0]">Savings Found</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-[#00A6B2]">50K+</div>
-                <div className="text-[#C0C0C0]">Active Users</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-[#00A6B2]">99%</div>
-                <div className="text-[#C0C0C0]">Customer Satisfaction</div>
-              </div>
-            </div>
-          </div>
+          
         </div>
       </div>
     </div>

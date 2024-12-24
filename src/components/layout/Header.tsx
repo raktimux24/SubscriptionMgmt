@@ -53,7 +53,7 @@ export function Header() {
             ) : (
               <>
                 <a href="#features" className="text-[#C0C0C0] hover:text-[#00A6B2] transition-colors">Features</a>
-                
+                <a href="#valueproposition" className="text-[#C0C0C0] hover:text-[#00A6B2] transition-colors">Why SubscriptEase</a>
                 <a href="#testimonials" className="text-[#C0C0C0] hover:text-[#00A6B2] transition-colors">Testimonials</a>
               </>
             )}
@@ -143,6 +143,13 @@ export function Header() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Features
+              </a>
+              <a 
+                href="#valueproposition" 
+                className="block px-4 py-2 text-[#C0C0C0] hover:text-[#00A6B2] hover:bg-[#1A1A1A] transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Why SubscriptEase
               </a>
               <a 
                 href="#testimonials" 

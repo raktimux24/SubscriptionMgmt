@@ -2,9 +2,6 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthGuard } from './components/auth/AuthGuard';
 import { Header } from './components/layout/Header';
-import { Hero } from './components/home/Hero';
-import { Features } from './components/home/Features';
-import { Testimonials } from './components/home/Testimonials';
 import { Footer } from './components/layout/Footer';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
@@ -23,6 +20,7 @@ import { Budget } from './pages/Budget';
 import { Categories } from './pages/Categories';
 import { useNotificationSystem } from './hooks/useNotificationSystem';
 import { Toaster } from 'react-hot-toast';
+import Home from './pages/Home';
 
 function NotificationWrapper({ children }: { children: React.ReactNode }) {
   useNotificationSystem();
@@ -33,11 +31,7 @@ function HomePage() {
   return (
     <>
       <Header />
-      <main>
-        <Hero />
-        <Features />
-        <Testimonials />
-      </main>
+      <Home />
       <Footer />
     </>
   );
