@@ -12,6 +12,11 @@ export function SubscriptionList() {
   const navigate = useNavigate();
   const { subscriptions, loading, updateSubscription, deleteSubscription } = useSubscriptions();
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortConfig, setSortConfig] = useState<{ field: string; order: string }>({
+    field: 'cost',
+    order: 'asc',
+  });
+  
   const {
     showUpgradeModal,
     handleAddSubscriptionClick,
@@ -34,14 +39,33 @@ export function SubscriptionList() {
     }
   };
 
-  const filteredSubscriptions = subscriptions.filter(subscription => {
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      subscription.name.toLowerCase().includes(searchLower) ||
-      subscription.category.toLowerCase().includes(searchLower) ||
-      subscription.status.toLowerCase().includes(searchLower)
-    );
-  });
+  const handleSort = (field: string, order: string) => {
+    setSortConfig({ field, order });
+  };
+
+  const sortedAndFilteredSubscriptions = [...subscriptions]
+    .filter(subscription => {
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        subscription.name.toLowerCase().includes(searchLower) ||
+        subscription.category.toLowerCase().includes(searchLower) ||
+        subscription.status.toLowerCase().includes(searchLower)
+      );
+    })
+    .sort((a, b) => {
+      const order = sortConfig.order === 'asc' ? 1 : -1;
+      
+      switch (sortConfig.field) {
+        case 'cost':
+          return (a.cost - b.cost) * order;
+        case 'startDate':
+          return (new Date(a.startDate).getTime() - new Date(b.startDate).getTime()) * order;
+        case 'nextPayment':
+          return (new Date(a.nextPaymentDate).getTime() - new Date(b.nextPaymentDate).getTime()) * order;
+        default:
+          return 0;
+      }
+    });
 
   if (loading) {
     return (
@@ -70,11 +94,12 @@ export function SubscriptionList() {
           <SubscriptionListHeader
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
+            onSortClick={handleSort}
           />
 
           <div className="bg-[#1A1A1A] rounded-lg border border-[#2A2A2A] overflow-hidden">
             <SubscriptionTable
-              subscriptions={filteredSubscriptions}
+              subscriptions={sortedAndFilteredSubscriptions}
               onStatusChange={handleStatusChange}
               onEdit={handleEdit}
               onDelete={handleDelete}

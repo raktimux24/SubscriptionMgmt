@@ -1,17 +1,15 @@
 import React from 'react';
-import { Search, Filter, ArrowUpDown } from 'lucide-react';
+import { Search } from 'lucide-react';
 
 interface SubscriptionListHeaderProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
-  onFilterClick: () => void;
-  onSortClick: () => void;
+  onSortClick: (field: string, order: string) => void;
 }
 
 export function SubscriptionListHeader({
   searchTerm,
   onSearchChange,
-  onFilterClick,
   onSortClick
 }: SubscriptionListHeaderProps) {
   return (
@@ -21,26 +19,48 @@ export function SubscriptionListHeader({
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#C0C0C0]" />
           <input
             type="text"
-            placeholder="Search by name, category, or status..."
+            placeholder="Search by name..."
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
             className="w-full pl-10 pr-4 py-2 bg-[#121212] border border-[#2A2A2A] rounded-lg text-[#EAEAEA] placeholder-[#C0C0C0] focus:outline-none focus:border-[#00A6B2]"
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <button 
-            onClick={onFilterClick}
+            onClick={() => onSortClick('cost', 'asc')}
             className="flex items-center gap-2 px-4 py-2 bg-[#2A2A2A] rounded-lg text-[#C0C0C0] hover:bg-[#363636] transition-colors"
           >
-            <Filter className="h-4 w-4" />
-            Filter
+            Cost ↑
           </button>
           <button 
-            onClick={onSortClick}
+            onClick={() => onSortClick('cost', 'desc')}
             className="flex items-center gap-2 px-4 py-2 bg-[#2A2A2A] rounded-lg text-[#C0C0C0] hover:bg-[#363636] transition-colors"
           >
-            <ArrowUpDown className="h-4 w-4" />
-            Sort
+            Cost ↓
+          </button>
+          <button 
+            onClick={() => onSortClick('startDate', 'asc')}
+            className="flex items-center gap-2 px-4 py-2 bg-[#2A2A2A] rounded-lg text-[#C0C0C0] hover:bg-[#363636] transition-colors"
+          >
+            Start Date ↑
+          </button>
+          <button 
+            onClick={() => onSortClick('startDate', 'desc')}
+            className="flex items-center gap-2 px-4 py-2 bg-[#2A2A2A] rounded-lg text-[#C0C0C0] hover:bg-[#363636] transition-colors"
+          >
+            Start Date ↓
+          </button>
+          <button 
+            onClick={() => onSortClick('nextPayment', 'asc')}
+            className="flex items-center gap-2 px-4 py-2 bg-[#2A2A2A] rounded-lg text-[#C0C0C0] hover:bg-[#363636] transition-colors"
+          >
+            Next Payment ↑
+          </button>
+          <button 
+            onClick={() => onSortClick('nextPayment', 'desc')}
+            className="flex items-center gap-2 px-4 py-2 bg-[#2A2A2A] rounded-lg text-[#C0C0C0] hover:bg-[#363636] transition-colors"
+          >
+            Next Payment ↓
           </button>
         </div>
       </div>
