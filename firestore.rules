@@ -15,36 +15,41 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && request.auth.uid == userId;
       allow update, delete: if isOwner(userId);
-      
-      // User's subscriptions
-      match /subscriptions/{subscriptionId} {
-        allow read: if isOwner(userId);
-        allow write: if isOwner(userId);
-      }
+    }
 
-      // User's budgets
-      match /budgets/{budgetId} {
-        allow read: if isOwner(userId);
-        allow write: if isOwner(userId);
-      }
+    // Subscriptions collection (top-level)
+    match /subscriptions/{subscriptionId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
 
-      // User's schedule reviews
-      match /scheduleReviews/{reviewId} {
-        allow read: if isOwner(userId);
-        allow write: if isOwner(userId);
-      }
+    // Budgets collection (top-level)
+    match /budgets/{budgetId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
 
-      // User's categories
-      match /categories/{categoryId} {
-        allow read: if isOwner(userId);
-        allow write: if isOwner(userId);
-      }
+    // Schedule reviews collection (top-level)
+    match /scheduleReviews/{reviewId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
 
-      // User's payments
-      match /payments/{paymentId} {
-        allow read: if isOwner(userId);
-        allow write: if isOwner(userId);
-      }
+    // Categories collection (top-level)
+    match /categories/{categoryId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    // Payments collection (top-level)
+    match /payments/{paymentId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
 
     // Subscription plans (read-only for authenticated users)
