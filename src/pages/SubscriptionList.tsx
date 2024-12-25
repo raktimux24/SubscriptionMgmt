@@ -72,12 +72,14 @@ export function SubscriptionList() {
             onSearchChange={setSearchTerm}
           />
 
-          <SubscriptionTable
-            subscriptions={filteredSubscriptions}
-            onStatusChange={handleStatusChange}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
+          <div className="bg-[#1A1A1A] rounded-lg border border-[#2A2A2A] overflow-hidden">
+            <SubscriptionTable
+              subscriptions={filteredSubscriptions}
+              onStatusChange={handleStatusChange}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          </div>
         </div>
       </div>
 

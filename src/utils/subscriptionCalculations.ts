@@ -58,17 +58,21 @@ export function calculateMonthlySpendingHistory(subscriptions: Subscription[], m
   }
 
   subscriptions.forEach(subscription => {
-    if (subscription.status !== 'active') return;
-
     const startDate = new Date(subscription.startDate);
     const amount = typeof subscription.amount === 'string' ? parseFloat(subscription.amount) : subscription.amount;
     const monthlyAmount = calculateMonthlyAmount(amount, subscription.billingCycle);
 
     result.forEach((monthData, index) => {
       const [month, year] = monthData.month.split(' ');
-      const currentDate = new Date(parseInt(year), new Date(Date.parse(month + " 1, 2000")).getMonth(), 1);
+      const monthIndex = new Date(Date.parse(`${month} 1 ${year}`)).getMonth();
+      const currentDate = new Date(parseInt(year), monthIndex, 1);
+      const endDate = subscription.endDate ? new Date(subscription.endDate) : null;
       
-      if (startDate <= currentDate) {
+      // Check if subscription was active during this month
+      if (startDate <= currentDate && 
+          (!endDate || endDate >= currentDate) && 
+          (subscription.status === 'active' || 
+           (subscription.status === 'cancelled' && endDate && endDate >= currentDate))) {
         monthData.amount += monthlyAmount;
       }
     });
@@ -90,15 +94,23 @@ export function calculateSpendingTrend(subscriptions: Subscription[]): {
   const currentMonth = history[history.length - 1].amount;
   const previousMonth = history[history.length - 2].amount;
 
-  if (previousMonth === 0) {
-    return { percentage: 100, trend: 'up' };
+  // Handle cases where both months are 0 or very close to 0
+  if (Math.abs(currentMonth) < 0.01 && Math.abs(previousMonth) < 0.01) {
+    return { percentage: 0, trend: 'neutral' };
+  }
+
+  // If previous month was 0, calculate percentage based on current month
+  if (Math.abs(previousMonth) < 0.01) {
+    return { 
+      percentage: currentMonth > 0 ? 100 : 0,
+      trend: currentMonth > 0 ? 'up' : 'neutral'
+    };
   }
 
   const percentage = ((currentMonth - previousMonth) / previousMonth) * 100;
   const trend: 'up' | 'down' | 'neutral' = 
-    percentage > 0 ? 'up' : 
-    percentage < 0 ? 'down' : 
-    'neutral';
+    Math.abs(percentage) < 0.01 ? 'neutral' :
+    percentage > 0 ? 'up' : 'down';
 
   return {
     percentage: Math.abs(percentage),
@@ -107,8 +119,26 @@ export function calculateSpendingTrend(subscriptions: Subscription[]): {
 }
 
 export function calculateProjectedAnnualSpend(subscriptions: Subscription[]): number {
-  const monthlyTotal = calculateTotalMonthlySpend(subscriptions);
-  return monthlyTotal * 12;
+  const today = new Date();
+  let annualTotal = 0;
+
+  subscriptions.forEach(subscription => {
+    if (subscription.status !== 'active') return;
+
+    const amount = typeof subscription.amount === 'string' ? parseFloat(subscription.amount) : subscription.amount;
+    const monthlyAmount = calculateMonthlyAmount(amount, subscription.billingCycle);
+    
+    // Calculate months remaining until end date or 12 months
+    const endDate = subscription.endDate ? new Date(subscription.endDate) : new Date(today.getFullYear() + 1, today.getMonth(), today.getDate());
+    const monthsRemaining = Math.min(
+      12,
+      Math.max(0, Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24 * 30.44)))
+    );
+
+    annualTotal += monthlyAmount * monthsRemaining;
+  });
+
+  return annualTotal;
 }
 
 export function getUpcomingRenewals(subscriptions: Subscription[]): Subscription[] {
