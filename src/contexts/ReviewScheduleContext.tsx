@@ -105,10 +105,12 @@ export function ReviewScheduleProvider({ children }: { children: React.ReactNode
   // Load initial schedule from Firebase
   useEffect(() => {
     async function loadSchedule() {
+      console.log('Loading schedule, auth state:', { userId: user?.uid, isAuthenticated: !!user });
       if (!user?.uid) return;
       
       try {
         const savedSchedule = await getScheduleReview(user.uid);
+        console.log('Loaded schedule:', savedSchedule);
         if (savedSchedule) {
           dispatch({ 
             type: 'UPDATE_SCHEDULE', 
@@ -126,12 +128,15 @@ export function ReviewScheduleProvider({ children }: { children: React.ReactNode
   // Save schedule changes to Firebase
   useEffect(() => {
     async function saveSchedule() {
+      console.log('Saving schedule, auth state:', { userId: user?.uid, isAuthenticated: !!user });
       if (!user?.uid) return;
       
       try {
         if (state.schedule.enabled) {
+          console.log('Saving enabled schedule:', state.schedule);
           await saveScheduleReview(user.uid, state.schedule);
         } else {
+          console.log('Saving disabled schedule');
           await updateScheduleReview(user.uid, { enabled: false });
         }
       } catch (error) {
