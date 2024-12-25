@@ -40,13 +40,10 @@ service cloud.firestore {
     }
 
     // Schedule reviews collection (top-level)
-    match /scheduleReviews/{reviewId} {
-      allow read, list: if isAuthenticated();
-      allow create: if isAuthenticated();
-      allow update, delete: if isAuthenticated() && (
-        resource == null || 
-        resource.data.userId == request.auth.uid
-      );
+    match /scheduleReviews/{userId} {
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow update, delete: if isAuthenticated() && request.auth.uid == userId;
     }
 
     // Categories collection (top-level)
