@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Calendar } from 'lucide-react';
+import { Calendar, Loader2 } from 'lucide-react';
 import { CategorySelect } from './CategorySelect';
 import { useSubscriptions } from '../../hooks/useSubscriptions';
 import { useNavigate } from 'react-router-dom';
@@ -24,7 +24,7 @@ interface SubscriptionFormProps {
 }
 
 export function SubscriptionForm({ subscription, mode = 'add' }: SubscriptionFormProps) {
-  const { register, handleSubmit, formState: { errors } } = useForm<SubscriptionFormData>({
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<SubscriptionFormData>({
     defaultValues: mode === 'edit' && subscription ? {
       name: subscription.name,
       amount: subscription.amount,
@@ -40,30 +40,41 @@ export function SubscriptionForm({ subscription, mode = 'add' }: SubscriptionFor
   const navigate = useNavigate();
   const { isAtLimit } = useSubscriptionLimits();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const onSubmit = async (data: SubscriptionFormData) => {
-    if (mode === 'edit' && subscription) {
-      const { error } = await updateSubscription(subscription.id, {
-        ...data,
-        nextPayment: calculateNextPayment(data.startDate, data.billingCycle)
-      });
-      if (!error) {
-        navigate('/dashboard');
+    if (isProcessing) return;
+    setIsProcessing(true);
+    
+    try {
+      if (mode === 'edit' && subscription) {
+        const { error } = await updateSubscription(subscription.id, {
+          ...data,
+          nextPayment: calculateNextPayment(data.startDate, data.billingCycle)
+        });
+        if (!error) {
+          navigate('/dashboard');
+        }
+      } else {
+        if (isAtLimit) {
+          setShowUpgradeModal(true);
+          setIsProcessing(false);
+          return;
+        }
+        
+        const { error } = await addSubscription({
+          ...data,
+          status: 'active',
+          nextPayment: calculateNextPayment(data.startDate, data.billingCycle)
+        });
+        if (!error) {
+          navigate('/dashboard');
+        }
       }
-    } else {
-      if (isAtLimit) {
-        setShowUpgradeModal(true);
-        return;
-      }
-      
-      const { error } = await addSubscription({
-        ...data,
-        status: 'active',
-        nextPayment: calculateNextPayment(data.startDate, data.billingCycle)
-      });
-      if (!error) {
-        navigate('/dashboard');
-      }
+    } catch (error) {
+      // toast.error('An error occurred. Please try again.');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -116,7 +127,7 @@ export function SubscriptionForm({ subscription, mode = 'add' }: SubscriptionFor
               Amount
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#6B7280]">
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white">
                 $
               </span>
               <input
@@ -160,11 +171,14 @@ export function SubscriptionForm({ subscription, mode = 'add' }: SubscriptionFor
               Start Date
             </label>
             <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#6B7280]" />
+              <button type="button" onClick={() => document.querySelector('input[type="date"]').showPicker()} className="absolute left-3 top-1/2 transform -translate-y-1/2 bg-transparent border-none cursor-pointer">
+                <Calendar className="h-5 w-5 text-white" />
+              </button>
               <input
                 type="date"
                 {...register('startDate', { required: 'Start date is required' })}
                 className="w-full pl-10 pr-4 py-2 bg-[#121212] border border-[#2A2A2A] rounded-lg text-[#EAEAEA] focus:outline-none focus:border-[#00A6B2]"
+                style={{ MozAppearance: 'textfield' }}
               />
             </div>
             {errors.startDate && (
@@ -203,7 +217,7 @@ export function SubscriptionForm({ subscription, mode = 'add' }: SubscriptionFor
           />
         </div>
 
-        <div className="flex justify-end space-x-4">
+        <div className="mt-8 flex justify-end">
           <button
             type="button"
             onClick={() => navigate('/dashboard')}
@@ -213,13 +227,28 @@ export function SubscriptionForm({ subscription, mode = 'add' }: SubscriptionFor
           </button>
           <button
             type="submit"
-            className="px-6 py-2 bg-[#00A6B2] text-white rounded-lg hover:bg-[#008A94] transition-colors"
+            disabled={isProcessing || isSubmitting}
+            className="inline-flex items-center justify-center px-6 py-2 bg-[#00A6B2] text-white rounded-lg hover:bg-[#008A94] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {mode === 'edit' ? 'Update Subscription' : 'Add Subscription'}
+            {isProcessing ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                {mode === 'edit' ? 'Updating...' : 'Adding...'}
+              </>
+            ) : (
+              mode === 'edit' ? 'Update Subscription' : 'Add Subscription'
+            )}
           </button>
         </div>
       </form>
       {showUpgradeModal && <UpgradeModal onClose={() => setShowUpgradeModal(false)} />}
+      <style>
+        {`
+          input[type="date"]::-webkit-calendar-picker-indicator {
+            display: none;
+          }
+        `}
+      </style>
     </div>
   );
 }
