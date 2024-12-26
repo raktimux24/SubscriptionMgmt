@@ -176,7 +176,18 @@ export function SubscriptionForm({ subscription, mode = 'add' }: SubscriptionFor
               </button>
               <input
                 type="date"
-                {...register('startDate', { required: 'Start date is required' })}
+                {...register('startDate', { 
+                  required: 'Start date is required',
+                  validate: {
+                    validYear: (value) => {
+                      const date = new Date(value);
+                      const year = date.getFullYear();
+                      if (year < 1900) return 'Year must be 1900 or later';
+                      if (year > 2024) return 'Year cannot be in the future';
+                      return true;
+                    }
+                  }
+                })}
                 className="w-full pl-10 pr-4 py-2 bg-[#121212] border border-[#2A2A2A] rounded-lg text-[#EAEAEA] focus:outline-none focus:border-[#00A6B2]"
                 style={{ MozAppearance: 'textfield' }}
               />

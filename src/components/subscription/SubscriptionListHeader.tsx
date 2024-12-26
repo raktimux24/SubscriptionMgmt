@@ -5,13 +5,22 @@ interface SubscriptionListHeaderProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
   onSortClick: (field: string, order: string) => void;
+  subscription: {
+    id: string;
+  };
 }
 
 export function SubscriptionListHeader({
   searchTerm,
   onSearchChange,
-  onSortClick
+  onSortClick,
+  subscription
 }: SubscriptionListHeaderProps) {
+  const handleEdit = (subscriptionId: string) => {
+    // Navigate to the edit subscription page with the selected subscription ID
+    // navigate(`/edit-subscription/${subscriptionId}`);
+  };
+
   return (
     <div className="p-6 border-b border-[#2A2A2A]">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -61,6 +70,9 @@ export function SubscriptionListHeader({
             className="flex items-center gap-2 px-4 py-2 bg-[#2A2A2A] rounded-lg text-[#C0C0C0] hover:bg-[#363636] transition-colors"
           >
             Next Payment ↓
+          </button>
+          <button onClick={() => handleEdit(subscription.id)} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+            Edit
           </button>
         </div>
       </div>

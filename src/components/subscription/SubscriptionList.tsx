@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { SubscriptionListHeader } from './SubscriptionListHeader';
 import { Subscription } from '../../types/subscription';
+import { useNavigate } from 'react-router-dom';
 
 interface SubscriptionListProps {
   subscriptions: Subscription[];
@@ -12,6 +13,7 @@ export function SubscriptionList({ subscriptions }: SubscriptionListProps) {
     field: 'cost',
     order: 'asc',
   });
+  const navigate = useNavigate();
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
@@ -47,7 +49,24 @@ export function SubscriptionList({ subscriptions }: SubscriptionListProps) {
         onSearchChange={handleSearchChange}
         onSortClick={handleSort}
       />
-      {/* Subscription items will be rendered here */}
+      {/* Render subscription items */}
+      <div className="space-y-4">
+        {filteredSubscriptions.map(subscription => (
+          <div key={subscription.id} className="flex justify-between items-center border-b border-gray-300 py-2">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800">{subscription.name}</h2>
+              <p className="text-sm text-gray-600">Cost: ${subscription.cost}</p>
+              <p className="text-sm text-gray-600">Next Payment: {subscription.nextPaymentDate}</p>
+            </div>
+            <button
+              onClick={() => navigate(`/edit-subscription/${subscription.id}`)}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Edit
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

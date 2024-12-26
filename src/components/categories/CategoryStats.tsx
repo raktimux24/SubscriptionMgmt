@@ -7,16 +7,25 @@ export function CategoryStats() {
 
   // Add null check and default to empty array
   const validCategories = categories || [];
-  const totalBudget = validCategories.reduce((total, category) => total + (category.budget || 0), 0);
+  const totalBudget = validCategories.reduce((total, category) => {
+    const budget = parseFloat(category.budget?.toString() || '0');
+    return total + budget;
+  }, 0);
 
   const data = validCategories
-    .filter(category => category.budget > 0)
-    .map(category => ({
-      name: category.name,
-      value: category.budget || 0,
-      color: category.color || '#8884d8',
-      percentage: totalBudget > 0 ? ((category.budget / totalBudget) * 100).toFixed(1) : '0'
-    }));
+    .filter(category => {
+      const budget = parseFloat(category.budget?.toString() || '0');
+      return budget > 0;
+    })
+    .map(category => {
+      const budget = parseFloat(category.budget?.toString() || '0');
+      return {
+        name: category.name,
+        value: budget,
+        color: category.color || '#8884d8',
+        percentage: totalBudget > 0 ? ((budget / totalBudget) * 100).toFixed(1) : '0'
+      };
+    });
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {

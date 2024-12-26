@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useSubscriptions } from '../../hooks/useSubscriptions';
 import { SubscriptionTable } from '../subscription/SubscriptionTable';
 import { Loader } from 'lucide-react';
@@ -7,13 +7,14 @@ import type { Subscription } from '../../lib/firebase/subscriptions';
 
 export function SubscriptionList() {
   const { subscriptions, loading, updateSubscription, deleteSubscription } = useSubscriptions();
+  const navigate = useNavigate();
 
   const handleStatusChange = async (id: string, status: 'active' | 'inactive') => {
     await updateSubscription(id, { status });
   };
 
   const handleEdit = (subscription: Subscription) => {
-    // Navigation is handled by the Link component
+    navigate(`/edit-subscription/${subscription.id}`);
   };
 
   const handleDelete = async (id: string) => {
