@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { SubscriptionForm } from '../components/subscription/SubscriptionForm';
-import { ImportOptions } from '../components/subscription/ImportOptions';
 import { SubscriptionLayout } from '../components/subscription/SubscriptionLayout';
 import { useSubscriptionLimits } from '../hooks/useSubscriptionLimits';
 import { UpgradeModal } from '../components/subscription/UpgradeModal';

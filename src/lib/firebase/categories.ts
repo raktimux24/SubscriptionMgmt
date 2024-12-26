@@ -54,13 +54,42 @@ export function subscribeToCategories(callback: (categories: Category[]) => void
     });
 }
 
-export async function addCategory(categoryData: Omit<Category, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) {
+export async function checkDuplicateCategory(name: string): Promise<boolean> {
   try {
     if (!auth.currentUser) throw new Error('No authenticated user');
     
     const categoriesRef = collection(db, 'categories');
+    const q = query(
+      categoriesRef, 
+      where('userId', '==', auth.currentUser.uid),
+      where('name', '==', name.trim())
+    );
+    
+    const snapshot = await getDocs(q);
+    return !snapshot.empty;
+  } catch (error) {
+    console.error('Error checking duplicate category:', error);
+    return false;
+  }
+}
+
+export async function addCategory(categoryData: Omit<Category, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) {
+  try {
+    if (!auth.currentUser) throw new Error('No authenticated user');
+    
+    // Check for duplicate category
+    const isDuplicate = await checkDuplicateCategory(categoryData.name);
+    if (isDuplicate) {
+      return { 
+        category: null, 
+        error: 'Category already exists. Please enter a unique name.' 
+      };
+    }
+    
+    const categoriesRef = collection(db, 'categories');
     const newCategory = {
       ...categoryData,
+      name: categoryData.name.trim(), // Ensure the name is trimmed
       userId: auth.currentUser.uid,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
